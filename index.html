@@ -106,6 +106,19 @@
           lastData = data;
         }
       });
+
+      ready(function() {
+  // Update the widget anytime the document data changes.
+  grist.ready({columns: [{name: column, title: "Action"}]});
+  grist.onRecord(onRecord);
+
+  Vue.config.errorHandler = handleError;
+  app = new Vue({
+    el: '#app',
+    data: data,
+    methods: {applyActions}
+  });
+});
     </script>
   </body>
 </html>
