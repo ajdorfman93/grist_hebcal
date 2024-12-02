@@ -13,7 +13,10 @@
   <!-- Include the JavaScript code -->
   <script>
    // Let Grist know the widget is ready
-grist.ready();
+   grist.ready({
+    requiredAccess: 'full'
+   grist.ready({columns: ['URL', 'Content']});
+  });
 
 // Listen for record changes
 grist.onRecord(async (record, mappings) => {
