@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Render sanitized HTML from a cell</title>
+    <title>Render sanitized HTML from a cell or display content from a URL</title>
     <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.2.9/dist/purify.min.js"></script>
     <style>
@@ -19,6 +19,9 @@
           padding: 20px;
           text-align: center;
       }
+      iframe {
+          border: none;
+      }
     </style>
   </head>
   <body>
@@ -28,26 +31,46 @@
       var params = new URLSearchParams(window.location.search)
       var ADD_TAGS = params.get('tags')?.split(",");
       var ADD_ATTR = params.get('attr')?.split(",");
+      
+      function isValidUrl(string) {
+        try {
+          new URL(string);
+          return true;
+        } catch (_) {
+          return false;  
+        }
+      }
+      
       function render(elemId, content) {
         var el = document.getElementById(elemId);
         if (!content) {
           el.style.display = 'none';
         } else {
-          el.innerHTML = DOMPurify.sanitize(content, {ADD_TAGS, ADD_ATTR});
-          // If we are allowing scripts, let them execute, which doesn't
-          // normally happen when adding script elements using innerHTML.
-          if (ADD_TAGS?.includes("script")) {
-            Array.from(el.querySelectorAll("script")).forEach(oldScript => {
-              const newScript = document.createElement("script");
-              Array.from(oldScript.attributes)
-                .forEach(attr => newScript.setAttribute(attr.name, attr.value));
-              newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-              oldScript.parentNode.replaceChild(newScript, oldScript);
-            });
+          el.innerHTML = '';
+          if (isValidUrl(content)) {
+            var iframe = document.createElement('iframe');
+            iframe.src = content;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            el.appendChild(iframe);
+          } else {
+            el.innerHTML = DOMPurify.sanitize(content, {ADD_TAGS, ADD_ATTR});
+            // If we are allowing scripts, let them execute, which doesn't
+            // normally happen when adding script elements using innerHTML.
+            if (ADD_TAGS?.includes("script")) {
+              Array.from(el.querySelectorAll("script")).forEach(oldScript => {
+                const newScript = document.createElement("script");
+                Array.from(oldScript.attributes)
+                  .forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+              });
+            }
           }
           el.style.display = 'block';
         }
       }
+
       grist.ready({
         columns:["Html"],
         requiredAccess: 'read table'
