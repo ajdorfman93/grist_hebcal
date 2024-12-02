@@ -1,25 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Fetch HTML Content Widget</title>
-
-    <!-- Uses Vue.js and the Grist Plugin API -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.3/vue.min.js"></script>
-    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-
-    <!-- Include the JavaScript code -->
-    <script src="widget.js"></script>
-  </head>
-  <body>
-    <div id="app">
-      <div class="status" v-if="status">
-        <p>{{ status }}</p>
-      </div>
-      <div class="container" v-if="url">
-        <p><strong>URL:</strong> {{ url }}</p>
-        <button class="button" v-on:click="onFetchButtonClick">Fetch Content</button>
-      </div>
+<head>
+  <meta charset="utf-8">
+  <title>Fetch and Display HTML Content</title>
+  <!-- Include Grist Plugin API -->
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <!-- Include DOMPurify for sanitizing HTML -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.10/dist/purify.min.js"></script>
+  <!-- Include Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+    }
+    .status {
+      margin-bottom: 10px;
+      color: red;
+    }
+    .container {
+      margin-bottom: 10px;
+    }
+    .button {
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+    #content-display {
+      border: 1px solid #ccc;
+      padding: 10px;
+      max-height: 300px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="status" v-if="status">
+      <p>{{ status }}</p>
     </div>
-  </body>
+    <div class="container" v-if="url">
+      <p><strong>URL:</strong> {{ url }}</p>
+      <button class="button" @click="onFetchButtonClick">Fetch Content</button>
+    </div>
+    <div id="content-display" v-if="content" v-html="content"></div>
+  </div>
+
+  <!-- Include the JavaScript code -->
+  <script src="widget.js"></script>
+</body>
 </html>
