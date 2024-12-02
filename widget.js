@@ -94,7 +94,7 @@ async function onFetchButtonClick() {
 ready(function() {
   grist.ready({columns: [{name: urlColumn}, {name: contentColumn}]});
   grist.onRecord(onRecord);
-
+  const mapped = grist.mapColumnNames(record);
   Vue.config.errorHandler = handleError;
   app = new Vue({
     el: '#app',
