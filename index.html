@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Fetch HTML Content Widget</title>
+
+    <!-- Uses Vue.js and the Grist Plugin API -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.3/vue.min.js"></script>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+    <!-- Include the JavaScript code -->
+    <script src="widget.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <div class="status" v-if="status">
+        <p>{{ status }}</p>
+      </div>
+      <div class="container" v-if="url">
+        <p><strong>URL:</strong> {{ url }}</p>
+        <button class="button" v-on:click="onFetchButtonClick">Fetch Content</button>
+      </div>
+    </div>
+  </body>
+</html>
