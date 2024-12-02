@@ -1,0 +1,22 @@
+{
+  "name": "fetch-html-content-widget",
+  "description": "A widget that fetches HTML content from a URL in one column and updates another column with the content.",
+  "homePage": "https://ajdorfman93.github.io/grist_hebcal/",
+  "version": "1.0.0",
+  "grist": {
+    "name": "Fetch HTML Content Widget",
+    "url": "https://ajdorfman93.github.io/grist_hebcal/index.html",
+    "widgetId": "fetch-html-content-widget",
+    "published": true,
+    "accessLevel": "full",
+    "renderAfterReady": true,
+    "description": "Fetch HTML content from a URL column and update another column with the content.",
+    "authors": [
+      {
+        "name": "Your Name",
+        "url": "https://ajdorfman93.github.io/"
+      }
+    ],
+    "isGristLabsMaintained": false
+  }
+}
