@@ -28,10 +28,20 @@
     <div id="error"></div>
     <div id="rendered"></div>
     <script>
-      var params = new URLSearchParams(window.location.search)
+      // Include the ready function
+      function ready(fn) {
+        if (document.readyState !== 'loading'){
+          fn();
+        } else {
+          document.addEventListener('DOMContentLoaded', fn);
+        }
+      }
+
+      var params = new URLSearchParams(window.location.search);
       var ADD_TAGS = params.get('tags')?.split(",");
       var ADD_ATTR = params.get('attr')?.split(",");
-      
+
+      // Function to check if a string is a valid URL
       function isValidUrl(string) {
         try {
           new URL(string);
@@ -40,7 +50,37 @@
           return false;  
         }
       }
-      
+
+      // Handle errors
+      function handleError(err) {
+        console.error('ERROR', err);
+        document.getElementById('error').innerText = String(err).replace(/^Error: /, '');
+        document.getElementById('error').style.display = 'block';
+      }
+
+      // Function to apply actions to Grist
+      async function applyActions(actions) {
+        try {
+          await grist.docApi.applyUserActions(actions);
+          console.log('Added new row successfully.');
+        } catch (e) {
+          console.error('Error applying actions:', e);
+          handleError(e);
+        }
+      }
+
+      // Function to add a new row to a different table
+      function addRowToTable(htmlContent) {
+        const tableId = 'YourTableName'; // Replace with the actual table name or ID
+        const columnValues = {
+          'HtmlContent': htmlContent // Replace with the actual column name
+        };
+        const actions = [
+          ['AddRecord', tableId, null, columnValues]
+        ];
+        applyActions(actions);
+      }
+
       function render(elemId, content) {
         var el = document.getElementById(elemId);
         if (!content) {
@@ -53,10 +93,23 @@
             iframe.style.width = '100%';
             iframe.style.height = '100%';
             el.appendChild(iframe);
+
+            // Fetch HTML content from the URL and add it to the table
+            fetch(content)
+              .then(response => response.text())
+              .then(htmlContent => {
+                addRowToTable(htmlContent);
+              })
+              .catch(error => {
+                console.error('Error fetching URL content:', error);
+                handleError(error);
+              });
+
           } else {
-            el.innerHTML = DOMPurify.sanitize(content, {ADD_TAGS, ADD_ATTR});
-            // If we are allowing scripts, let them execute, which doesn't
-            // normally happen when adding script elements using innerHTML.
+            const sanitizedContent = DOMPurify.sanitize(content, {ADD_TAGS, ADD_ATTR});
+            el.innerHTML = sanitizedContent;
+
+            // If we are allowing scripts, let them execute
             if (ADD_TAGS?.includes("script")) {
               Array.from(el.querySelectorAll("script")).forEach(oldScript => {
                 const newScript = document.createElement("script");
@@ -66,59 +119,58 @@
                 oldScript.parentNode.replaceChild(newScript, oldScript);
               });
             }
+
+            // Add the HTML content to the table
+            addRowToTable(content);
           }
           el.style.display = 'block';
         }
       }
 
-      grist.ready({
-        columns:["Html"],
-        requiredAccess: 'read table'
-      });
       let lastId = undefined;
       let lastData = undefined;
-      // Helper function that reads first value from a table with a single column.
+
+      // Helper function that reads the first value from a table with a single column
       function singleColumn(record) {
         const columns = Object.keys(record || {}).filter(k => k !== 'id');
         return columns.length === 1 ? record[columns[0]] : undefined;
       }
-      grist.onNewRecord(() => {
-        render("error", null);
-        render("rendered", "");
-        lastData = "";
-        lastId = 0;
-      });
-      grist.onRecord(function(record) {
-        // If user picked all columns, this helper function will return a mapped record.
-        const mapped = grist.mapColumnNames(record);
-        // We will fallback to reading a value from a single column to
-        // support old way of mapping (exposing only a single column).
-        // New widgets should only check if mapped object is truthy.
-        const data = mapped ? mapped.Html : singleColumn(record);
-        if (data === undefined) {
-          render("error", "Please choose a column to show in the Creator Panel.");
-        } else {
-          render("error", null);
-          if (lastId !== record.id || lastData !== data) {
-            render("rendered", String(data || ''));
-          }
-          lastId = record.id;
-          lastData = data;
-        }
-      });
 
+      // Ready function to ensure the DOM is loaded
       ready(function() {
-  // Update the widget anytime the document data changes.
-  grist.ready({columns: [{name: column, title: "Action"}]});
-  grist.onRecord(onRecord);
+        grist.ready({
+          columns: ["Html"],
+          requiredAccess: 'full' // We need full access to add rows
+        });
 
-  Vue.config.errorHandler = handleError;
-  app = new Vue({
-    el: '#app',
-    data: data,
-    methods: {applyActions}
-  });
-});
+        grist.onNewRecord(() => {
+          render("error", null);
+          render("rendered", "");
+          lastData = "";
+          lastId = 0;
+        });
+
+        grist.onRecord(function(record) {
+          try {
+            // Map column names if provided
+            const mapped = grist.mapColumnNames(record);
+            // Fallback to reading a value from a single column
+            const data = mapped ? mapped.Html : singleColumn(record);
+            if (data === undefined) {
+              render("error", "Please choose a column to show in the Creator Panel.");
+            } else {
+              render("error", null);
+              if (lastId !== record.id || lastData !== data) {
+                render("rendered", String(data || ''));
+              }
+              lastId = record.id;
+              lastData = data;
+            }
+          } catch (err) {
+            handleError(err);
+          }
+        });
+      });
     </script>
   </body>
 </html>
