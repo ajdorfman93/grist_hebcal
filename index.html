@@ -86,11 +86,10 @@
       }
     
       // Function to add a new row to the 'Times' table after deleting existing records
-      async function addRowToTable(htmlContent, selectedDate) {
+      async function addRowToTable(htmlContent) {
         const tableId = 'Times'; // Replace with the actual table name or ID
         const columnValues = {
-          'HtmlContent': htmlContent, // Replace with the actual column name
-          'Date': selectedDate // Replace 'Date' with the actual date column name in 'Times' table
+          'HtmlContent': htmlContent // Replace with the actual column name
         };
         const actions = [
           ['AddRecord', tableId, null, columnValues]
@@ -98,14 +97,14 @@
         try {
           await deleteAllRowsFromTable(); // Delete all records before adding new data
           await applyActions(actions);
-          console.log('Added new row successfully with selected date:', selectedDate);
+          console.log('Added new row successfully.');
         } catch (e) {
           console.error('Error applying actions:', e);
           handleError(e);
         }
       }
     
-      async function render(elemId, content, selectedDate) {
+      function render(elemId, content) {
         var el = document.getElementById(elemId);
         if (!content) {
           el.style.display = 'none';
@@ -119,14 +118,15 @@
             el.appendChild(iframe);
     
             // Fetch HTML content from the URL and add it to the table
-            try {
-              const response = await fetch(content);
-              const htmlContent = await response.text();
-              await addRowToTable(htmlContent, selectedDate);
-            } catch (error) {
-              console.error('Error fetching URL content:', error);
-              handleError(error);
-            }
+            fetch(content)
+              .then(response => response.text())
+              .then(async htmlContent => {
+                await addRowToTable(htmlContent);
+              })
+              .catch(error => {
+                console.error('Error fetching URL content:', error);
+                handleError(error);
+              });
     
           } else {
             const sanitizedContent = DOMPurify.sanitize(content, {ADD_TAGS, ADD_ATTR});
@@ -144,7 +144,7 @@
             }
     
             // Add the HTML content to the table
-            await addRowToTable(content, selectedDate);
+            addRowToTable(content);
           }
           el.style.display = 'block';
         }
@@ -162,31 +162,29 @@
       // Ready function to ensure the DOM is loaded
       ready(function() {
         grist.ready({
-          columns: ["Html", "Date"],
+          columns: ["Html"],
           requiredAccess: 'full' // We need full access to add rows
         });
     
         grist.onNewRecord(() => {
-          render("error", null, null);
-          render("rendered", "", null);
+          render("error", null);
+          render("rendered", "");
           lastData = "";
           lastId = 0;
         });
     
-        grist.onRecord(async function(record) {
+        grist.onRecord(function(record) {
           try {
             // Map column names if provided
             const mapped = grist.mapColumnNames(record);
             // Fallback to reading a value from a single column
             const data = mapped ? mapped.Html : singleColumn(record);
-            const selectedDate = mapped ? mapped.Date : record.Date;
-            console.log('Selected date:', selectedDate); // Debugging output
             if (data === undefined) {
-              await render("error", "Please choose a column to show in the Creator Panel.", null);
+              render("error", "Please choose a column to show in the Creator Panel.");
             } else {
-              await render("error", null, null);
+              render("error", null);
               if (lastId !== record.id || lastData !== data) {
-                await render("rendered", String(data || ''), selectedDate);
+                render("rendered", String(data || ''));
               }
               lastId = record.id;
               lastData = data;
@@ -196,6 +194,6 @@
           }
         });
       });
-    </script> 
+    </script>    
   </body>
 </html>
