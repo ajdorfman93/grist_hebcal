@@ -70,9 +70,10 @@
 
       // Function to add a new row to a different table
       function addRowToTable(htmlContent) {
-        const tableId = 'Times'; 
+        const tableId = 'Times'; // Replace with the actual table name or ID
         const columnValues = {
-          'HtmlContent': htmlContent 
+          'HtmlContent': htmlContent // Replace with the actual column name
+        };
         const actions = [
           ['AddRecord', tableId, null, columnValues]
         ];
