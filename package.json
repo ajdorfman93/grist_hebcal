@@ -1,22 +1,22 @@
 {
-  "name": "@gristlabs/widget-renderhtml",
-  "description": "Simple HTML viewer.",
-  "homePage": "https://github.com/gristlabs/grist-widget",
+  "name": "@ajdorfman93/widget-hebcal",
+  "description": "Simple widget to display Hebrew calendar dates and related information.",
+  "homePage": "https://github.com/ajdorfman93/grist_hebcal",
   "version": "0.0.1",
   "grist": {
-    "name": "HTML viewer",
-    "url": "https://gristlabs.github.io/grist-widget/renderhtml/index.html",
-    "widgetId": "@gristlabs/widget-renderhtml",
+    "name": "Hebrew Calendar Viewer",
+    "url": "https://ajdorfman93.github.io/grist_hebcal/",
+    "widgetId": "@ajdorfman93/widget-hebcal",
     "published": true,
-    "accessLevel": "read table",
+    "accessLevel": "full",
     "renderAfterReady": true,
-    "description": "View data from a selected record as rendered HTML.",
+    "description": "Display Hebrew calendar dates and related data from a selected record.",
     "authors": [
       {
-        "name": "Grist Labs",
-        "url": "https://github.com/gristlabs"
+        "name": "Alec Dorfman",
+        "url": "https://github.com/ajdorfman93"
       }
     ],
-    "isGristLabsMaintained": true
+    "isGristLabsMaintained": false
   }
 }
