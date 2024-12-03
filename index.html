@@ -135,41 +135,64 @@
         return columns.length === 1 ? record[columns[0]] : undefined;
       }
 
-      // Ready function to ensure the DOM is loaded
-      ready(function() {
-        grist.ready({
-          columns: ["Html"],
-          requiredAccess: 'full' // We need full access to add rows
-        });
+      let isInitialLoad = true; // Flag to track initial load
 
-        grist.onNewRecord(() => {
-          render("error", null);
-          render("rendered", "");
-          lastData = "";
-          lastId = 0;
-        });
+ready(function() {
+  grist.ready({
+    columns: ["Html"],
+    requiredAccess: 'full' // We need full access to add rows
+  });
 
-        grist.onRecord(function(record) {
-          try {
-            // Map column names if provided
-            const mapped = grist.mapColumnNames(record);
-            // Fallback to reading a value from a single column
-            const data = mapped ? mapped.Html : singleColumn(record);
-            if (data === undefined) {
-              render("error", "Please choose a column to show in the Creator Panel.");
-            } else {
-              render("error", null);
-              if (lastId !== record.id || lastData !== data) {
-                render("rendered", String(data || ''));
-              }
-              lastId = record.id;
-              lastData = data;
-            }
-          } catch (err) {
-            handleError(err);
-          }
-        });
-      });
+  // Triggered when a new record is added
+  grist.onNewRecord((record) => {
+    if (isInitialLoad) {
+      // Skip applying the action during the initial load
+      console.log("Skipping action during initial load.");
+      return;
+    }
+
+    try {
+      // Check if the record is from the 'Entry' table
+      if (record.tableId === 'Entry') { // Replace 'Entry' with your actual table name if different
+        // Get the HTML content from the 'Html' column or adjust for your column name
+        const htmlContent = record.Html || singleColumn(record);
+
+        if (htmlContent) {
+          // Add the HTML content to the 'Times' table
+          addRowToTable(htmlContent);
+        } else {
+          console.warn("No HTML content found in the new record.");
+        }
+      }
+    } catch (err) {
+      handleError(err);
+    }
+  });
+
+  // Triggered when a new record is loaded
+  grist.onRecord(function(record) {
+    try {
+      const mapped = grist.mapColumnNames(record);
+      const data = mapped ? mapped.Html : singleColumn(record);
+      if (data === undefined) {
+        render("error", "Please choose a column to show in the Creator Panel.");
+      } else {
+        render("error", null);
+        if (lastId !== record.id || lastData !== data) {
+          render("rendered", String(data || ''));
+        }
+        lastId = record.id;
+        lastData = data;
+      }
+    } catch (err) {
+      handleError(err);
+    }
+  });
+
+  // End of initial load phase
+  isInitialLoad = false;
+});
+
     </script>
   </body>
 </html>
