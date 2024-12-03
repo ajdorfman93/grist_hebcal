@@ -61,21 +61,21 @@
       async function applyActions(actions) {
         try {
           await grist.docApi.applyUserActions(actions);
-          console.log('Added new row successfully.');
+          console.log('Updateed new row successfully.');
         } catch (e) {
           console.error('Error applying actions:', e);
           handleError(e);
         }
       }
 
-      // Function to add a new row to a different table
-      function addRowToTable(htmlContent) {
+      // Function to update a new row to a different table
+      function updateRowToTable(htmlContent) {
         const tableId = 'Times'; // Replace with the actual table name or ID
         const columnValues = {
           'HtmlContent': htmlContent // Replace with the actual column name
         };
         const actions = [
-          ['AddRecord', tableId, null, columnValues]
+          ['UpdateRecord', tableId, null, columnValues]
         ];
         applyActions(actions);
       }
@@ -93,11 +93,11 @@
             iframe.style.height = 'inherit';
             el.appendChild(iframe);
 
-            // Fetch HTML content from the URL and add it to the table
+            // Fetch HTML content from the URL and update it to the table
             fetch(content)
               .then(response => response.text())
               .then(htmlContent => {
-                addRowToTable(htmlContent);
+                updateRowToTable(htmlContent);
               })
               .catch(error => {
                 console.error('Error fetching URL content:', error);
@@ -119,8 +119,8 @@
               });
             }
 
-            // Add the HTML content to the table
-            addRowToTable(content);
+            // Update the HTML content to the table
+            updateRowToTable(content);
           }
           el.style.display = 'block';
         }
@@ -140,10 +140,10 @@
 ready(function() {
   grist.ready({
     columns: ["Html"],
-    requiredAccess: 'full' // We need full access to add rows
+    requiredAccess: 'full' // We need full access to update rows
   });
 
-  // Triggered when a new record is added
+  // Triggered when a new record is updateed
   grist.onNewRecord((record) => {
     if (isInitialLoad) {
       // Skip applying the action during the initial load
@@ -158,8 +158,8 @@ ready(function() {
         const htmlContent = record.Html || singleColumn(record);
 
         if (htmlContent) {
-          // Add the HTML content to the 'Times' table
-          addRowToTable(htmlContent);
+          // Update the HTML content to the 'Times' table
+          updateRowToTable(htmlContent);
         } else {
           console.warn("No HTML content found in the new record.");
         }
