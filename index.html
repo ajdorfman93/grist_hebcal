@@ -86,10 +86,11 @@
       }
     
       // Function to add a new row to the 'Times' table after deleting existing records
-      async function addRowToTable(htmlContent) {
+      async function addRowToTable(htmlContent, selectedDate) {
         const tableId = 'Times'; // Replace with the actual table name or ID
         const columnValues = {
-          'HtmlContent': htmlContent // Replace with the actual column name
+          'HtmlContent': htmlContent, // Replace with the actual column name
+          'Date': selectedDate // Replace 'Date' with the actual date column name in 'Times' table
         };
         const actions = [
           ['AddRecord', tableId, null, columnValues]
@@ -97,14 +98,14 @@
         try {
           await deleteAllRowsFromTable(); // Delete all records before adding new data
           await applyActions(actions);
-          console.log('Added new row successfully.');
+          console.log('Added new row successfully with selected date:', selectedDate);
         } catch (e) {
           console.error('Error applying actions:', e);
           handleError(e);
         }
       }
     
-      function render(elemId, content) {
+      async function render(elemId, content, selectedDate) {
         var el = document.getElementById(elemId);
         if (!content) {
           el.style.display = 'none';
@@ -118,15 +119,14 @@
             el.appendChild(iframe);
     
             // Fetch HTML content from the URL and add it to the table
-            fetch(content)
-              .then(response => response.text())
-              .then(async htmlContent => {
-                await addRowToTable(htmlContent);
-              })
-              .catch(error => {
-                console.error('Error fetching URL content:', error);
-                handleError(error);
-              });
+            try {
+              const response = await fetch(content);
+              const htmlContent = await response.text();
+              await addRowToTable(htmlContent, selectedDate);
+            } catch (error) {
+              console.error('Error fetching URL content:', error);
+              handleError(error);
+            }
     
           } else {
             const sanitizedContent = DOMPurify.sanitize(content, {ADD_TAGS, ADD_ATTR});
@@ -144,7 +144,7 @@
             }
     
             // Add the HTML content to the table
-            addRowToTable(content);
+            await addRowToTable(content, selectedDate);
           }
           el.style.display = 'block';
         }
@@ -162,29 +162,31 @@
       // Ready function to ensure the DOM is loaded
       ready(function() {
         grist.ready({
-          columns: ["Html"],
+          columns: ["Html", "Date"],
           requiredAccess: 'full' // We need full access to add rows
         });
     
         grist.onNewRecord(() => {
-          render("error", null);
-          render("rendered", "");
+          render("error", null, null);
+          render("rendered", "", null);
           lastData = "";
           lastId = 0;
         });
     
-        grist.onRecord(function(record) {
+        grist.onRecord(async function(record) {
           try {
             // Map column names if provided
             const mapped = grist.mapColumnNames(record);
             // Fallback to reading a value from a single column
             const data = mapped ? mapped.Html : singleColumn(record);
+            const selectedDate = mapped ? mapped.Date : record.Date;
+            console.log('Selected date:', selectedDate); // Debugging output
             if (data === undefined) {
-              render("error", "Please choose a column to show in the Creator Panel.");
+              await render("error", "Please choose a column to show in the Creator Panel.", null);
             } else {
-              render("error", null);
+              await render("error", null, null);
               if (lastId !== record.id || lastData !== data) {
-                render("rendered", String(data || ''));
+                await render("rendered", String(data || ''), selectedDate);
               }
               lastId = record.id;
               lastData = data;
@@ -194,6 +196,6 @@
           }
         });
       });
-    </script>    
+    </script> 
   </body>
 </html>
