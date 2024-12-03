@@ -61,21 +61,21 @@
       async function applyActions(actions) {
         try {
           await grist.docApi.applyUserActions(actions);
-          console.log('Updated record successfully.');
+          console.log('Added new row successfully.');
         } catch (e) {
           console.error('Error applying actions:', e);
           handleError(e);
         }
       }
 
-      // Function to update a record in the 'Times' table
-      function updateRowInTable(recordId, htmlContent) {
+      // Function to add a new row to a different table
+      function addRowToTable(htmlContent) {
         const tableId = 'Times'; // Replace with the actual table name or ID
         const columnValues = {
           'HtmlContent': htmlContent // Replace with the actual column name
         };
         const actions = [
-          ['UpdateRecord', tableId, recordId, columnValues]
+          ['AddRecord', tableId, null, columnValues]
         ];
         applyActions(actions);
       }
@@ -93,12 +93,11 @@
             iframe.style.height = 'inherit';
             el.appendChild(iframe);
 
-            // Fetch HTML content from the URL and update the record
+            // Fetch HTML content from the URL and add it to the table
             fetch(content)
               .then(response => response.text())
               .then(htmlContent => {
-                const recordId = lastId || null; // Use the last ID tracked or provide your logic to determine the record ID
-                updateRowInTable(recordId, htmlContent);
+                addRowToTable(htmlContent);
               })
               .catch(error => {
                 console.error('Error fetching URL content:', error);
@@ -106,7 +105,7 @@
               });
 
           } else {
-            const sanitizedContent = DOMPurify.sanitize(content, { ADD_TAGS, ADD_ATTR });
+            const sanitizedContent = DOMPurify.sanitize(content, {ADD_TAGS, ADD_ATTR});
             el.innerHTML = sanitizedContent;
 
             // If we are allowing scripts, let them execute
@@ -120,9 +119,8 @@
               });
             }
 
-            // Update the HTML content in the table
-            const recordId = lastId || null; // Use the last ID tracked or provide your logic to determine the record ID
-            updateRowInTable(recordId, content);
+            // Add the HTML content to the table
+            addRowToTable(content);
           }
           el.style.display = 'block';
         }
@@ -141,7 +139,7 @@
       ready(function() {
         grist.ready({
           columns: ["Html"],
-          requiredAccess: 'full' // We need full access to update rows
+          requiredAccess: 'full' // We need full access to add rows
         });
 
         grist.onNewRecord(() => {
