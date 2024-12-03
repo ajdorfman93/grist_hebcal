@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.2.9/dist/purify.min.js"></script>
     <style>
       html, body, textarea {
-          display: flex;
+          display: inherit;
           padding: 0;
           margin: 0;
       }
@@ -89,8 +89,8 @@
           if (isValidUrl(content)) {
             var iframe = document.createElement('iframe');
             iframe.src = content;
-            iframe.style.width = '100%';
-            iframe.style.height = '100%';
+            iframe.style.width = 'inherit';
+            iframe.style.height = 'inherit';
             el.appendChild(iframe);
 
             // Fetch HTML content from the URL and add it to the table
