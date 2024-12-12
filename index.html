@@ -1,57 +1,58 @@
-<script>
-  async function updateTimesFromEntry(entryTableRecord) {
-    try {
-      // Extract HtmlContent from EntryTable record
-      const newHtmlContent = entryTableRecord.HtmlContent;
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Update Related Table</title>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <script>
+      // Function to update the related Times table
+      async function updateTimes(htmlContent) {
+        try {
+          const response = await fetch("/update-times", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ htmlContent })
+          });
 
-      if (!newHtmlContent) {
-        console.warn("No HtmlContent found in the EntryTable record.");
-        return;
-      }
-
-      // Fetch Times table
-      const timesTable = await grist.docApi.fetchTable("Times");
-      if (!timesTable || !timesTable.records.length) {
-        console.warn("No records found in the Times table.");
-        return;
-      }
-
-      // Find the top record in the Times table
-      const topTimesRecord = timesTable.records.sort((a, b) => a.id - b.id)[0];
-
-      if (topTimesRecord) {
-        // Update the top record in Times table with the new HtmlContent
-        const actions = [
-          ["UpdateRecord", "Times", topTimesRecord.id, { HtmlContent: newHtmlContent }]
-        ];
-        await grist.docApi.applyUserActions(actions);
-        console.log(`Updated Times record (ID: ${topTimesRecord.id}) with new HtmlContent.`);
-      } else {
-        console.warn("No valid record found in the Times table to update.");
-      }
-    } catch (error) {
-      console.error("Error updating Times table:", error);
-    }
-  }
-
-  // Monitor changes in the EntryTable and trigger the update function
-  ready(function () {
-    grist.ready({
-      columns: ["HtmlContent"],
-      requiredAccess: "full", // Ensure full access to update rows
-    });
-
-    grist.onRecord(function (entryRecord) {
-      try {
-        if (entryRecord && entryRecord.HtmlContent) {
-          // Pass the EntryTable record to updateTimesFromEntry
-          updateTimesFromEntry(entryRecord);
-        } else {
-          console.warn("No valid EntryTable record or HtmlContent found.");
+          if (!response.ok) {
+            throw new Error(`Failed to update Times: ${response.statusText}`);
+          }
+          console.log("Successfully updated Times record.");
+        } catch (error) {
+          console.error("Error updating Times record:", error);
         }
-      } catch (err) {
-        console.error("Error processing EntryTable record:", err);
       }
-    });
-  });
-</script>
+
+      // Ready function to initialize the widget
+      function ready(fn) {
+        if (document.readyState !== "loading") {
+          fn();
+        } else {
+          document.addEventListener("DOMContentLoaded", fn);
+        }
+      }
+
+      ready(function () {
+        grist.ready({
+          columns: ["HtmlContent"], // Only need the HtmlContent column from EntryTable
+          requiredAccess: "read table" // Minimal required access
+        });
+
+        grist.onRecord(function (record) {
+          if (record && record.HtmlContent) {
+            console.log("Detected HtmlContent update in EntryTable:", record.HtmlContent);
+            updateTimes(record.HtmlContent); // Send updated HtmlContent to backend
+          } else {
+            console.warn("No HtmlContent detected in the updated EntryTable record.");
+          }
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div>
+      <h2>Updating Related Table</h2>
+      <p>Listening for changes in EntryTable and updating Times table...</p>
+    </div>
+  </body>
+</html>
