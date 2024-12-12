@@ -1,22 +1,22 @@
 {
-  "name": "@gristlabs/widget-renderhtml",
-  "description": "Simple HTML viewer.",
+  "name": "@gristlabs/widget-renderhtml-update",
+  "description": "HTML viewer with update capability for related tables.",
   "homePage": "https://github.com/gristlabs/grist-widget",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "grist": {
-    "name": "HTML viewer",
+    "name": "HTML Viewer & Times Updater",
     "url": "https://gristlabs.github.io/grist-widget/renderhtml/index.html",
-    "widgetId": "@gristlabs/widget-renderhtml",
+    "widgetId": "@gristlabs/widget-renderhtml-update",
     "published": true,
-    "accessLevel": "read table",
+    "accessLevel": "full",
     "renderAfterReady": true,
-    "description": "View data from a selected record as rendered HTML.",
+    "description": "View and process HTML from a record in the EntryTable, and update related Times table records.",
     "authors": [
       {
-        "name": "Grist Labs",
-        "url": "https://github.com/gristlabs"
+        "name": "Your Name",
+        "url": "https://github.com/your-profile"
       }
     ],
-    "isGristLabsMaintained": true
+    "isGristLabsMaintained": false
   }
 }
