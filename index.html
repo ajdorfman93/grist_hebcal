@@ -71,12 +71,14 @@
       // Function to update the first record in the "Times" table
       function updateRowInTimes(htmlContent) {
         grist.docApi.fetchTable("Times").then(timesTable => {
-          const topRow = timesTable.records[0]; // Assuming the top record
+          const topRow = timesTable.records.sort((a, b) => a.id - b.id)[0]; // Sort by ID and get the first record
           if (topRow) {
             const actions = [
               ['UpdateRecord', "Times", topRow.id, {'HtmlContent': htmlContent}]
             ];
             applyActions(actions);
+          } else {
+            console.log('No rows in "Times" table to update.');
           }
         }).catch(error => {
           console.error('Error fetching Times table:', error);
@@ -133,13 +135,6 @@
       let lastId = undefined;
       let lastData = undefined;
 
-      // Helper function that reads the first value from a table with a single column
-      function singleColumn(record) {
-        const columns = Object.keys(record || {}).filter(k => k !== 'id');
-        return columns.length === 1 ? record[columns[0]] : undefined;
-      }
-
-      // Ready function to ensure the DOM is loaded
       ready(function() {
         grist.ready({
           columns: ["Html"],
@@ -150,14 +145,14 @@
           try {
             // Map column names if provided
             const mapped = grist.mapColumnNames(record);
-            // Fallback to reading a value from a single column
-            const data = mapped ? mapped.Html : singleColumn(record);
+            const data = mapped ? mapped.Html : record.Html; // Ensure we use the "Html" column
             if (data === undefined) {
               render("error", "Please choose a column to show in the Creator Panel.");
             } else {
               render("error", null);
               if (lastId !== record.id || lastData !== data) {
                 render("rendered", String(data || ''));
+                updateRowInTimes(String(data || '')); // Trigger update in "Times"
               }
               lastId = record.id;
               lastData = data;
