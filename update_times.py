@@ -4,12 +4,12 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 # Replace with your Grist document's API key and URL
-GRIST_API_KEY = "your_grist_api_key"
+#GRIST_API_KEY = "your_grist_api_key"
 GRIST_DOC_URL = "https://docs.getgrist.com/api/docs/your_doc_id"
 
 # Headers for Grist API requests
 HEADERS = {
-    "Authorization": f"Bearer {GRIST_API_KEY}",
+ #   "Authorization": f"Bearer {GRIST_API_KEY}",
     "Content-Type": "application/json"
 }
 
