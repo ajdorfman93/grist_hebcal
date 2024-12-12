@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 # Replace with your Grist document's API key and URL
 #GRIST_API_KEY = "your_grist_api_key"
-GRIST_DOC_URL = "https://docs.getgrist.com/api/docs/your_doc_id"
+GRIST_DOC_URL = "https://lakewoodluach.getgrist.com/api/docs/mfG1uWuVC9zwM1kapuvW1U"
 
 # Headers for Grist API requests
 HEADERS = {
