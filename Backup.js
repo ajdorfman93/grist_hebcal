@@ -75,7 +75,7 @@
           'HtmlContent': htmlContent // Set the HtmlContent column with the provided content
         };
         const actions = [
-          ['AddRecord', tableId, null, columnValues] // Add a record with the specified column values
+          ['UpdateRecord', tableId, 1, columnValues] // Add a record with the specified column values
         ];
         applyActions(actions); // Apply the action
       }
