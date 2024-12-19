@@ -61,7 +61,7 @@
       async function applyActions(actions) {
         try {
           await grist.docApi.applyUserActions(actions); // Apply actions via the Grist API
-          console.log('Added new row successfully.'); // Log success message
+          console.log('Updated row successfully.'); // Log success message
         } catch (e) {
           console.error('Error applying actions:', e); // Log errors
           handleError(e); // Display the error
